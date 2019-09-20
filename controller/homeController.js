@@ -2,74 +2,57 @@
 
 const About = require("../models/aboutModel");
 const Product = require('../models/productsModel');
-// const redis = require('redis');
+const redis = require('redis');
 
-// const client = redis.createClient();
+const client = redis.createClient();
 
 exports.homePage = (req, res, next) => {
-  Product.find({Enable: true},{__v: 0}).skip(3).sort({Create_at: -1})
-    .exec()
-    .then(result => {
-        result.map(imgEdit => {
-            let	propImg = 'Img_Product',
-                position = imgEdit.Img_Product.indexOf(',');
-            if(imgEdit.Img_Product.length !== position) {
-              imgEdit[propImg] = imgEdit.Img_Product.split(",", 1);
-            } else {
-              imgEdit[propImg] = imgEdit.Img_Product;
-            }
-            return imgEdit;
+    new Promise((resolve, reject) => {
+      client.hget('key', 'all',(err, obj) => {
+          if(err) {
+              reject(err);
+          } else {
+              resolve(obj);
+          }
         });
-        res.status(200).json(result);
-    }).catch((err) => {
-        res.status(404).json("Not Found" + err);
-    });
-    // new Promise((resolve, reject) => {
-    //   client.hget('key', 'all',(err, obj) => {
-    //       if(err) {
-    //           reject(err);
-    //       } else {
-    //           resolve(obj);
-    //       }
-    //     });
-    // })
-    // .then(reply => {
-    //   if(reply) {
-    //     res.status(200).json(JSON.parse(reply));
-    //   } else {
-    //     Product.find({Enable: true},{__v: 0}).skip(3).sort({Create_at: -1})
-    //     .exec()
-    //     .then(result => {
-    //         result.map(imgEdit => {
-    //             let	propImg = 'Img_Product',
-    //                 position = imgEdit.Img_Product.indexOf(',');
-    //             if(imgEdit.Img_Product.length !== position) {
-    //               imgEdit[propImg] = imgEdit.Img_Product.split(",", 1);
-    //             } else {
-    //               imgEdit[propImg] = imgEdit.Img_Product;
-    //             }
-    //             return imgEdit;
-    //         });
-    //         new Promise((resolve, reject) => {
-    //           client.hmset('key', 
-    //           [
-    //             "all", JSON.stringify(result)
-    //           ], (err, obj) => {
-    //               if(err) {
-    //                   reject(err);
-    //               } else {
-    //                   resolve(obj);
-    //               }
-    //           });
-    //         })
-    //         .then(() => res.status(200).json(result))
-    //         .catch(err => res.status(500).send(err));
-    //     }).catch((err) => {
-    //         res.status(404).json("Not Found" + err);
-    //     });
-    //   }
-    // })
-    // .catch(err => res.status(500).send(err));
+    })
+    .then(reply => {
+      if(reply) {
+        res.status(200).json(JSON.parse(reply));
+      } else {
+        Product.find({Enable: true},{__v: 0}).skip(3).sort({Create_at: -1})
+        .exec()
+        .then(result => {
+            result.map(imgEdit => {
+                let	propImg = 'Img_Product',
+                    position = imgEdit.Img_Product.indexOf(',');
+                if(imgEdit.Img_Product.length !== position) {
+                  imgEdit[propImg] = imgEdit.Img_Product.split(",", 1);
+                } else {
+                  imgEdit[propImg] = imgEdit.Img_Product;
+                }
+                return imgEdit;
+            });
+            new Promise((resolve, reject) => {
+              client.hmset('key', 
+              [
+                "all", JSON.stringify(result)
+              ], (err, obj) => {
+                  if(err) {
+                      reject(err);
+                  } else {
+                      resolve(obj);
+                  }
+              });
+            })
+            .then(() => res.status(200).json(result))
+            .catch(err => res.status(500).send(err));
+        }).catch((err) => {
+            res.status(404).json("Not Found" + err);
+        });
+      }
+    })
+    .catch(err => res.status(500).send(err));
 }
 
 
