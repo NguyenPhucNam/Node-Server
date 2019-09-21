@@ -32,12 +32,11 @@ const allowedExt = [
     '.svg',
 ];
 
-app.use(express.static(path.join(__dirname, 'dist'), { maxAge: '1 year' }));
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1 year' }));
 
 app.use((req, res, next) => {
     if (allowedExt.filter(ext => req.url.indexOf(ext) > 0).length > 0) {
-        const stat = fs.statSync(`dist/${req.url}`);
+        const stat = fs.statSync(`public/${req.url}`);
         Promise.all([
             res.header("Access-Control-Allow-Origin", "*"),
             res.header(
@@ -72,10 +71,9 @@ app.use('/api/kenh-nguoi-ban', sellerRouter);
 
 app.get('*', (req, res) => {
     if (allowedExt.filter(ext => req.url.indexOf(ext) > 0).length > 0) {
-        console.log(req.url);
-        res.sendFile(path.join(__dirname, `dist/${req.url}`));
+        res.sendFile(path.join(__dirname, `public/${req.url}`));
     } else {
-        res.sendFile(path.join(__dirname, 'dist/index.html'));
+        res.sendFile(path.join(__dirname, 'public/index.html'));
     }
 });
 
