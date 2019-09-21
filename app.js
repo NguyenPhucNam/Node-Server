@@ -52,26 +52,23 @@ app.use((req, res, next) => {
     }
     if (req.method === "OPTIONS") {
         res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
-        res.status(200).send('Headers ...');
+        res.status(200).send();
     }
     next();
 });
 
-app.get('/api/test', (req, res) => {
-    res.status(200).send('Done test...');
-});
 app.use('/api', homeRouter);
 app.use('/api/san-pham', productsRouter);
 app.use('/api/tai-khoan', accountRouter);
 app.use('/api/kenh-nguoi-ban', sellerRouter);
 
-// app.get('*', (req, res) => {
-//     if (allowedExt.filter(ext => req.url.indexOf(ext) > 0).length > 0) {
-//         res.sendFile(path.join(__dirname, `public/${req.url}`));
-//     } else {
-//         res.sendFile(path.join(__dirname, 'public/index.html'));
-//     }
-// });
+app.get('*', (req, res) => {
+    if (allowedExt.filter(ext => req.url.indexOf(ext) > 0).length > 0) {
+        res.sendFile(path.join(__dirname, `public/${req.url}`));
+    } else {
+        res.sendFile(path.join(__dirname, 'public/index.html'));
+    }
+});
 
 app.use((req,res,next) => {
     const error = new Error('Not Found');
