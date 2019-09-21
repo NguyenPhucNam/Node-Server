@@ -2,8 +2,6 @@ const compression = require("compression");
 const express = require("express");
 const fs = require('fs');
 const path = require('path');
-const mongoose = require("mongoose");
-const config = require('./config/config.json');
 const bodyParser = require("body-parser");
 const homeRouter = require("./routes/home");
 const productsRouter = require("./routes/products");
@@ -54,28 +52,26 @@ app.use((req, res, next) => {
     }
     if (req.method === "OPTIONS") {
         res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
-        return res.status(200).send();
+        res.status(200).send('Headers ...');
     }
     next();
 });
 
-mongoose.Promise = global.Promise;
-mongoose.connect(config.MongoDb, { useNewUrlParser: true })
-.then(() => console.log("Start Database Success"))
-.catch((err, done) => done("Could not connect to DB: " + err));
-
+app.get('/api/test', (req, res) => {
+    res.status(200).send('Done test...');
+});
 app.use('/api', homeRouter);
 app.use('/api/san-pham', productsRouter);
 app.use('/api/tai-khoan', accountRouter);
 app.use('/api/kenh-nguoi-ban', sellerRouter);
 
-app.get('*', (req, res) => {
-    if (allowedExt.filter(ext => req.url.indexOf(ext) > 0).length > 0) {
-        res.sendFile(path.join(__dirname, `public/${req.url}`));
-    } else {
-        res.sendFile(path.join(__dirname, 'public/index.html'));
-    }
-});
+// app.get('*', (req, res) => {
+//     if (allowedExt.filter(ext => req.url.indexOf(ext) > 0).length > 0) {
+//         res.sendFile(path.join(__dirname, `public/${req.url}`));
+//     } else {
+//         res.sendFile(path.join(__dirname, 'public/index.html'));
+//     }
+// });
 
 app.use((req,res,next) => {
     const error = new Error('Not Found');
