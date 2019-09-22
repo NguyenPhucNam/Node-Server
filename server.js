@@ -1,5 +1,4 @@
 const app = require("./app");
-const parseArgs = require('minimist');
 const mongoose = require("mongoose");
 const config = require('./config/config');
 const server = require("http").Server(app);
@@ -9,14 +8,9 @@ mongoose.connect(config.MongoDb, { useNewUrlParser: true })
 .then(() => console.log("Start Database Success"))
 .catch((err, done) => done("Could not connect to DB: " + err));
 
-const args = parseArgs(process.argv.slice(2));
-const { name = 'default', port = '80'} = args;
+const hostName = '0.0.0.0';
+const port = process.env.NODE_PORT || config.Port;
 
-server.listen(+port, '0.0.0.0', (err) => {
-    if (err) {
-      console.log(err.stack);
-      return;
-    }
-  
-    console.log(`Node [${name}] listens on http://127.0.0.1:${port}.`);
+server.listen(port, hostName, () => {
+    console.log(`Node listens on http://127.0.0.1:${port}.`);
 });
